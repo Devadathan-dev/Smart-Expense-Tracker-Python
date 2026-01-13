@@ -9,11 +9,11 @@
 - ✅ Matplotlib charts → PNG export
 - ✅ CSV storage
 
-## 📸 Demo
-![Terminal](expenses.png)
-![Chart](expense_chart.png)
+## 📸 Demo Screenshots
+**Terminal Demo:** ![Terminal Demo](expenses.png)  
+**Chart Output:** ![Chart](expense_chart.png)
 
-## 🚀 Run
+## 🚀 Quick Start
 ```bash
 pip install matplotlib pandas
 python tracker.py
