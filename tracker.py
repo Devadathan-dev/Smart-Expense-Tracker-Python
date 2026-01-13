@@ -18,18 +18,37 @@ def load_data():
 
 def add_expense():
     print("\n=== Add Expense ===")
-    amount = float(input("Amount (₹): "))
-    BUDGET_LIMIT = 50000  # Your monthly budget
-    total_spent = sum(float(row[2]) for row in load_data()) if load_data() else 0
-    if total_spent + amount > BUDGET_LIMIT:
-        print(f"⚠️ Warning: ₹{total_spent+amount-BUDGET_LIMIT:.0f} over budget!")
+    
+    try:
+        amount = float(input("Amount (₹): "))
+    except ValueError:
+        print("❌ Please enter a valid number.")
+        return
 
-    category = input(f"Category ({'/'.join(categories)}): ")
+    BUDGET_LIMIT = 50000  # Your monthly budget
+    data = load_data()
+    total_spent = sum(float(row[2]) for row in data) if data else 0
+
+    if total_spent + amount > BUDGET_LIMIT:
+        print(f"⚠️ Warning: ₹{total_spent + amount - BUDGET_LIMIT:.0f} over budget!")
+        if input("Continue anyway? (y/n): ").lower() != 'y':
+            return
+
+
+    print("Categories:", ", ".join(categories))
+    category = input("Category: ").title()
+
+    if category not in categories:
+        print("❌ Invalid category.")
+        return
+    
     note = input("Note: ")
     
     with open('expenses.csv', 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow([datetime.now().strftime('%Y-%m-%d'), category, amount, note])
+    
+    print("✅ Expense added.")
 
 def show_report():
     data = load_data()
@@ -37,7 +56,8 @@ def show_report():
         print("No expenses yet")
         return
     
-    df = [[row[0], row[1], float(row[2])] for row in data]
+    df = [[row[0], row[1], float(row[2])] for row in data if len(row)>=3]
+
     total = sum(row[2] for row in df)
     
     print(f"\n💰 Total: ₹{total:.2f}")
@@ -53,23 +73,26 @@ def show_report():
 
 def show_chart():
     data = load_data()
-    if not data: return
+    if not data:
+        print("No expenses to show.")
+        return
     
     cats = defaultdict(float)
     for row in data:
-        cats[row[1]] += float(row[2])
-    plt.savefig('expense_chart.png', dpi=300, bbox_inches='tight')
-    print("📊 Chart saved: expense_chart.png")
+        if len(row) >= 3:
+            cats[row[1]] += float(row[2])
 
-    
+
     plt.bar(cats.keys(), cats.values())
     plt.title("Expense Breakdown")
     plt.ylabel("₹ Amount")
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.show()
-    plt.savefig('expenses.png')
+    
+    plt.savefig('expenses.png', dpi=300, bbox_inches='tight')
     print("📊 Chart saved as expenses.png")
+    plt.show()
+
 
 while True:
     print("\n=== Smart Expense Tracker ===")
